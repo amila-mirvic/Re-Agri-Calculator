@@ -120,7 +120,7 @@
       const climate = document.getElementById("climate").value;
 
       try {
-        const response = await fetch("https://re-agri-calculator.vercel.app/api/generate-recommendations", {
+        const response = await fetch("/api/generate-recommendations", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ cropCategory, cropType, soilType, rainfall, climate }),
