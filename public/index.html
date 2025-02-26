@@ -99,7 +99,7 @@
       <label>Timeframe (years): <input type="number" id="timeframe" required></label>
       <button type="button" onclick="calculateResults()">Calculate</button>
     </form>
-    <div id="loading" class="loading hidden">Calculating... Please wait.</div>
+    <div id="loading" class="loading hidden">Calculating... Please wait. It may take minute. </div>
     <div id="results" class="hidden">
       <h2>Results & Recommendations</h2>
       <h3>Best Practices</h3>
@@ -120,7 +120,7 @@
       const climate = document.getElementById("climate").value;
 
       try {
-        const response = await fetch("/api/generate-recommendations.js", {
+        const response = await fetch("/api/generate-recommendations", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ cropCategory, cropType, soilType, rainfall, climate }),
