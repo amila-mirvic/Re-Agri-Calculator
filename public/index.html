@@ -52,27 +52,10 @@
     }
     .results {
       margin-top: 20px;
-      padding: 20px;
-      background: #e8f5e9; /* Soft green for readability */
+      padding: 15px;
+      background: #e8f5e9;
       border: 1px solid #c8e6c9;
       border-radius: 5px;
-      height: 450px;
-      overflow-y: auto;
-      font-size: 16px;
-      line-height: 1.6;
-    }
-    
-    .results h2, .results h3 {
-      color: #2e7d32; /* Dark green for contrast */
-      margin-bottom: 10px;
-    }
-    
-    .results p {
-      margin-bottom: 10px;
-    }
-    
-    .results strong {
-      color: #1b5e20; /* Slightly darker green for emphasis */
     }
     .hidden { display: none; }
     .loading {
@@ -119,20 +102,14 @@
       <label>Timeframe (years): <input type="number" id="timeframe" required></label>
       <button type="button" onclick="calculateResults()">Calculate</button>
     </form>
-    <div id="loading" class="loading hidden">Calculating... Please wait. It may take a minute.</div>
-
-    <div id="results" class="results hidden">
+    <div id="loading" class="loading hidden">Calculating... Please wait. It may take minute. </div>
+    <div id="results" class="hidden">
       <h2>Results & Recommendations</h2>
       <h3>Best Practices</h3>
       <p id="bestPractices"></p>
-
       <h3>Estimated ROI</h3>
       <p><strong>Projected Gains:</strong> <span id="projectedGains"></span></p>
       <p><strong>Net ROI:</strong> <span id="netROI"></span></p>
-
-      <h3>ROI Explanation & Investment Advice</h3>
-      <p id="roiAdvice"></p>
-
       <button id="downloadPDF">Download Report</button>
     </div>
   </div>
@@ -144,40 +121,26 @@
       const soilType = document.getElementById("soilType").value;
       const rainfall = document.getElementById("rainfall").value;
       const climate = document.getElementById("climate").value;
-      const budget = document.getElementById("budget").value;
 
       try {
         const response = await fetch("/api/generate-recommendations", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ cropCategory, cropType, soilType, rainfall, climate, budget }),
+          body: JSON.stringify({ cropCategory, cropType, soilType, rainfall, climate }),
         });
+      
 
         const data = await response.json();
-
         if (data.bestPractices) {
-          document.getElementById("bestPractices").innerHTML = data.bestPractices.replace(/\n/g, "<br><br>");
+          document.getElementById("bestPractices").innerHTML = data.bestPractices.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>").replace(/\n/g, "<br><br>");
         }
-        if (data.roiAdvice) {
-          document.getElementById("roiAdvice").innerHTML = data.roiAdvice.replace(/\n/g, "<br><br>");
-        }
-
         return data;
       } catch (error) {
         console.error("Error fetching recommendations:", error);
         document.getElementById("bestPractices").textContent = "Error fetching best practices.";
-        document.getElementById("roiAdvice").textContent = "Error fetching ROI advice.";
         return null;
       }
     }
-
-    // Function to format AI-generated text by replacing * symbols with HTML tags
-function formatText(text) {
-  return text
-    .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")  // Bold (**text** → <strong>text</strong>)
-    .replace(/\*(.*?)\*/g, "<em>$1</em>")             // Italics (*text* → <em>text</em>)
-    .replace(/\n/g, "<br><br>");                      // Line breaks for readability
-}
 
     function calculateROI(budget, farmSize, timeframe) {
       const baseROI = budget * 0.2;
@@ -190,20 +153,66 @@ function formatText(text) {
       document.getElementById("loading").classList.remove("hidden");
       document.getElementById("results").classList.add("hidden");
       const data = await fetchBestPractices();
-
+      
       const budget = parseFloat(document.getElementById("budget").value) || 0;
       const farmSize = parseFloat(document.getElementById("farmSize").value) || 0;
       const timeframe = parseFloat(document.getElementById("timeframe").value) || 0;
-
+      
       const projectedGains = calculateROI(budget, farmSize, timeframe);
       const netROI = projectedGains - budget;
-
+      
       document.getElementById("projectedGains").textContent = `$${projectedGains.toFixed(2)}`;
       document.getElementById("netROI").textContent = `$${netROI.toFixed(2)}`;
-
+      
       document.getElementById("loading").classList.add("hidden");
       document.getElementById("results").classList.remove("hidden");
     }
+
+    document.getElementById("downloadPDF").addEventListener("click", () => {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+      
+        // Title
+        doc.setFontSize(18);
+        doc.text("RE-AGRI Calculator Report", 20, 20);
+      
+        // Best Practices
+        const bestPractices = document.getElementById("bestPractices").innerText;
+        doc.setFontSize(14);
+        doc.text("Best Practices:", 20, 40);
+        doc.setFontSize(12);
+      
+        // Wrap long text properly
+        let y = 50;
+        const lineHeight = 7;
+        const maxWidth = 170;
+        const splitText = doc.splitTextToSize(bestPractices, maxWidth);
+      
+        splitText.forEach((line) => {
+          if (y + lineHeight > 280) { // If the text reaches the bottom, add a new page
+            doc.addPage();
+            y = 20; // Reset Y position for new page
+          }
+          doc.text(line, 20, y);
+          y += lineHeight;
+        });
+      
+        // ROI Calculation (Add new page if needed)
+        if (y + 30 > 280) {
+          doc.addPage();
+          y = 20;
+        }
+        
+        doc.setFontSize(14);
+        doc.text("Estimated ROI:", 20, y + 10);
+        doc.setFontSize(12);
+        doc.text(`Projected Gains: ${document.getElementById("projectedGains").textContent}`, 20, y + 20);
+        doc.text(`Net ROI: ${document.getElementById("netROI").textContent}`, 20, y + 30);
+      
+        // Save the PDF
+        doc.save("RE-AGRI-Report.pdf");
+      });
+      
   </script>
 </body>
 </html>
