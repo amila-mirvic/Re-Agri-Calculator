@@ -52,12 +52,27 @@
     }
     .results {
       margin-top: 20px;
-      padding: 15px;
-      background: #e8f5e9;
+      padding: 20px;
+      background: #e8f5e9; /* Soft green for readability */
       border: 1px solid #c8e6c9;
       border-radius: 5px;
       height: 450px;
       overflow-y: auto;
+      font-size: 16px;
+      line-height: 1.6;
+    }
+    
+    .results h2, .results h3 {
+      color: #2e7d32; /* Dark green for contrast */
+      margin-bottom: 10px;
+    }
+    
+    .results p {
+      margin-bottom: 10px;
+    }
+    
+    .results strong {
+      color: #1b5e20; /* Slightly darker green for emphasis */
     }
     .hidden { display: none; }
     .loading {
@@ -155,6 +170,14 @@
         return null;
       }
     }
+
+    // Function to format AI-generated text by replacing * symbols with HTML tags
+function formatText(text) {
+  return text
+    .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")  // Bold (**text** → <strong>text</strong>)
+    .replace(/\*(.*?)\*/g, "<em>$1</em>")             // Italics (*text* → <em>text</em>)
+    .replace(/\n/g, "<br><br>");                      // Line breaks for readability
+}
 
     function calculateROI(budget, farmSize, timeframe) {
       const baseROI = budget * 0.2;
