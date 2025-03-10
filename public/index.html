@@ -29,20 +29,17 @@
       text-align: center;
       color: #4CAF50;
     }
-    .form-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
+    .form-group {
+      display: flex;
       gap: 20px;
+      margin-bottom: 15px;
     }
-    label {
-      display: block;
-      margin-bottom: 8px;
-      font-weight: bold;
+    .form-group label {
+      flex: 1;
     }
     input, select, button {
       width: 100%;
       padding: 10px;
-      margin-bottom: 10px;
       border: 1px solid #ccc;
       border-radius: 5px;
     }
@@ -51,41 +48,36 @@
       color: white;
       border: none;
       cursor: pointer;
+      padding: 10px;
     }
     button:hover {
       background: #45a049;
     }
-    
-    /* Popup Modal */
     .modal {
       display: none;
       position: fixed;
-      z-index: 10;
+      z-index: 1;
       left: 0;
       top: 0;
       width: 100%;
       height: 100%;
       background-color: rgba(0, 0, 0, 0.5);
+      justify-content: center;
+      align-items: center;
     }
     .modal-content {
-      background-color: #fff;
-      margin: 10% auto;
+      background: white;
       padding: 20px;
-      width: 50%;
-      border-radius: 10px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      border-radius: 5px;
+      width: 80%;
+      max-width: 600px;
+      text-align: center;
     }
     .close {
-      color: #aaa;
       float: right;
-      font-size: 28px;
-      font-weight: bold;
+      font-size: 24px;
       cursor: pointer;
     }
-    .close:hover {
-      color: black;
-    }
-
     .hidden { display: none; }
     .loading {
       text-align: center;
@@ -99,144 +91,83 @@
   <div class="container">
     <h1>RE-AGRI Calculator</h1>
     <form id="calculator-form">
-      <label>Farm Size (ha): <input type="number" id="farmSize" required></label>
-      <label>Soil Type:
-        <select id="soilType">
-          <option value="sandy">Sandy</option>
-          <option value="clay">Clay</option>
-          <option value="loamy">Loamy</option>
-          <option value="silt">Silt</option>
-        </select>
-      </label>
-      <label>Rainfall (mm): <input type="number" id="rainfall" required></label>
-      <label>Climate:
-        <select id="climate">
-          <option value="tropical">Tropical</option>
-          <option value="arid">Arid</option>
-          <option value="temperate">Temperate</option>
-          <option value="cold">Cold</option>
-        </select>
-      </label>
-      <label>Crop Category:
-        <select id="cropCategory" required>
-          <option value="fruits">Fruits</option>
-          <option value="vegetables">Vegetables</option>
-          <option value="cereals">Cereals</option>
-          <option value="livestock">Livestock</option>
-          <option value="other">Other</option>
-        </select>
-      </label>
-      <label>Specific Crop Type: <input type="text" id="cropType" required></label>
-      <label>Budget (USD): <input type="number" id="budget" required></label>
-      <label>Timeframe (years): <input type="number" id="timeframe" required></label>
+      <div class="form-group">
+        <label>Farm Size (ha): <input type="number" id="farmSize" required></label>
+        <label>Soil Type:
+          <select id="soilType">
+            <option value="sandy">Sandy</option>
+            <option value="clay">Clay</option>
+            <option value="loamy">Loamy</option>
+            <option value="silt">Silt</option>
+          </select>
+        </label>
+      </div>
+      <div class="form-group">
+        <label>Rainfall (mm): <input type="number" id="rainfall" required></label>
+        <label>Climate:
+          <select id="climate">
+            <option value="tropical">Tropical</option>
+            <option value="arid">Arid</option>
+            <option value="temperate">Temperate</option>
+            <option value="cold">Cold</option>
+          </select>
+        </label>
+      </div>
+      <div class="form-group">
+        <label>Crop Category:
+          <select id="cropCategory" required>
+            <option value="fruits">Fruits</option>
+            <option value="vegetables">Vegetables</option>
+            <option value="cereals">Cereals</option>
+            <option value="livestock">Livestock</option>
+            <option value="other">Other</option>
+          </select>
+        </label>
+        <label>Specific Crop Type: <input type="text" id="cropType" required></label>
+      </div>
+      <div class="form-group">
+        <label>Budget (USD): <input type="number" id="budget" required></label>
+        <label>Timeframe (years): <input type="number" id="timeframe" required></label>
+      </div>
       <button type="button" onclick="calculateResults()">Calculate</button>
     </form>
     <div id="loading" class="loading hidden">Calculating... Please wait. It may take a minute.</div>
+  </div>
 
-    <div id="results" class="results hidden">
+  <div id="results-modal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal()">&times;</span>
       <h2>Results & Recommendations</h2>
       <h3>Best Practices</h3>
       <p id="bestPractices"></p>
-
       <h3>Estimated ROI</h3>
       <p><strong>Projected Gains:</strong> <span id="projectedGains"></span></p>
       <p><strong>Net ROI:</strong> <span id="netROI"></span></p>
-
       <h3>ROI Explanation & Investment Advice</h3>
       <p id="roiAdvice"></p>
-
-      <button id="downloadPDF">Download Report</button>
+      <button onclick="downloadPDF()">Download Report</button>
     </div>
   </div>
 
   <script>
-    async function fetchBestPractices() {
-      const cropCategory = document.getElementById("cropCategory").value;
-      const cropType = document.getElementById("cropType").value;
-      const soilType = document.getElementById("soilType").value;
-      const rainfall = document.getElementById("rainfall").value;
-      const climate = document.getElementById("climate").value;
-      const budget = document.getElementById("budget").value;
-
-      try {
-        const response = await fetch("/api/generate-recommendations", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ cropCategory, cropType, soilType, rainfall, climate, budget }),
-        });
-
-        const data = await response.json();
-
-        if (data.bestPractices) {
-          document.getElementById("bestPractices").innerHTML = data.bestPractices.replace(/\n/g, "<br><br>");
-        }
-        if (data.roiAdvice) {
-          document.getElementById("roiAdvice").innerHTML = data.roiAdvice.replace(/\n/g, "<br><br>");
-        }
-
-        return data;
-      } catch (error) {
-        console.error("Error fetching recommendations:", error);
-        document.getElementById("bestPractices").textContent = "Error fetching best practices.";
-        document.getElementById("roiAdvice").textContent = "Error fetching ROI advice.";
-        return null;
-      }
+    function calculateResults() {
+      document.getElementById('loading').classList.remove('hidden');
+      setTimeout(() => {
+        document.getElementById('loading').classList.add('hidden');
+        document.getElementById('results-modal').style.display = 'flex';
+      }, 1500);
     }
-
-    function calculateROI(budget, farmSize, timeframe) {
-      const baseROI = budget * 0.2;
-      const sizeFactor = farmSize * 100;
-      const timeFactor = timeframe * 500;
-      return baseROI + sizeFactor + timeFactor;
+    function closeModal() {
+      document.getElementById('results-modal').style.display = 'none';
     }
-
-    async function calculateResults() {
-      document.getElementById("loading").classList.remove("hidden");
-      document.getElementById("results").classList.add("hidden");
-      const data = await fetchBestPractices();
-
-      const budget = parseFloat(document.getElementById("budget").value) || 0;
-      const farmSize = parseFloat(document.getElementById("farmSize").value) || 0;
-      const timeframe = parseFloat(document.getElementById("timeframe").value) || 0;
-
-      const projectedGains = calculateROI(budget, farmSize, timeframe);
-      const netROI = projectedGains - budget;
-
-      document.getElementById("projectedGains").textContent = `$${projectedGains.toFixed(2)}`;
-      document.getElementById("netROI").textContent = `$${netROI.toFixed(2)}`;
-
-      document.getElementById("loading").classList.add("hidden");
-      document.getElementById("results").classList.remove("hidden");
-    }
-
-    function exportToPDF() {
+    function downloadPDF() {
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF();
-      
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(16);
-      doc.text("RE-AGRI REPORT", 10, 10);
-      
-      doc.setFont("helvetica", "normal");
-      doc.setFontSize(12);
-      let y = 20;
-      
-      doc.text("Best Practices:", 10, y);
-      y += 8;
-      doc.text(document.getElementById("bestPractices").innerText, 10, y, { maxWidth: 180 });
-      y += 20;
-      
-      doc.text("Estimated ROI:", 10, y);
-      y += 8;
-      doc.text("Projected Gains: " + document.getElementById("projectedGains").innerText, 10, y);
-      y += 8;
-      doc.text("Net ROI: " + document.getElementById("netROI").innerText, 10, y);
-      y += 20;
-      
-      doc.text("ROI Explanation & Investment Advice:", 10, y);
-      y += 8;
-      doc.text(document.getElementById("roiAdvice").innerText, 10, y, { maxWidth: 180 });
-      
+      doc.text("RE-AGRI Calculator Report", 10, 10);
+      doc.text(`Projected Gains: ${document.getElementById('projectedGains').textContent}`, 10, 20);
+      doc.text(`Net ROI: ${document.getElementById('netROI').textContent}`, 10, 30);
+      doc.text(`Best Practices: ${document.getElementById('bestPractices').textContent}`, 10, 40);
+      doc.text(`Investment Advice: ${document.getElementById('roiAdvice').textContent}`, 10, 50);
       doc.save("RE-AGRI_Report.pdf");
     }
   </script>
