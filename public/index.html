@@ -29,6 +29,11 @@
       text-align: center;
       color: #4CAF50;
     }
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
     label {
       display: block;
       margin-bottom: 8px;
@@ -37,7 +42,7 @@
     input, select, button {
       width: 100%;
       padding: 10px;
-      margin-bottom: 20px;
+      margin-bottom: 10px;
       border: 1px solid #ccc;
       border-radius: 5px;
     }
@@ -50,19 +55,35 @@
     button:hover {
       background: #45a049;
     }
-    .results {
-      margin-top: 20px;
-      padding: 15px;
-      background: #e8f5e9;
-      border: 1px solid #c8e6c9;
-      border-radius: 5px;
+    
+    /* Popup Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 10;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
     }
-    .hidden { display: none; }
-    .loading {
-      text-align: center;
-      font-size: 16px;
+    .modal-content {
+      background-color: #fff;
+      margin: 10% auto;
+      padding: 20px;
+      width: 50%;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    .close {
+      color: #aaa;
+      float: right;
+      font-size: 28px;
       font-weight: bold;
-      color: #4CAF50;
+      cursor: pointer;
+    }
+    .close:hover {
+      color: black;
     }
   </style>
 </head>
@@ -102,14 +123,20 @@
       <label>Timeframe (years): <input type="number" id="timeframe" required></label>
       <button type="button" onclick="calculateResults()">Calculate</button>
     </form>
-    <div id="loading" class="loading hidden">Calculating... Please wait. It may take minute. </div>
-    <div id="results" class="hidden">
+    <div id="loading" class="loading hidden">Calculating... Please wait. It may take a minute.</div>
+
+    <div id="results" class="results hidden">
       <h2>Results & Recommendations</h2>
       <h3>Best Practices</h3>
       <p id="bestPractices"></p>
+
       <h3>Estimated ROI</h3>
       <p><strong>Projected Gains:</strong> <span id="projectedGains"></span></p>
       <p><strong>Net ROI:</strong> <span id="netROI"></span></p>
+
+      <h3>ROI Explanation & Investment Advice</h3>
+      <p id="roiAdvice"></p>
+
       <button id="downloadPDF">Download Report</button>
     </div>
   </div>
@@ -121,23 +148,29 @@
       const soilType = document.getElementById("soilType").value;
       const rainfall = document.getElementById("rainfall").value;
       const climate = document.getElementById("climate").value;
+      const budget = document.getElementById("budget").value;
 
       try {
         const response = await fetch("/api/generate-recommendations", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ cropCategory, cropType, soilType, rainfall, climate }),
+          body: JSON.stringify({ cropCategory, cropType, soilType, rainfall, climate, budget }),
         });
-      
 
         const data = await response.json();
+
         if (data.bestPractices) {
-          document.getElementById("bestPractices").innerHTML = data.bestPractices.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>").replace(/\n/g, "<br><br>");
+          document.getElementById("bestPractices").innerHTML = data.bestPractices.replace(/\n/g, "<br><br>");
         }
+        if (data.roiAdvice) {
+          document.getElementById("roiAdvice").innerHTML = data.roiAdvice.replace(/\n/g, "<br><br>");
+        }
+
         return data;
       } catch (error) {
         console.error("Error fetching recommendations:", error);
         document.getElementById("bestPractices").textContent = "Error fetching best practices.";
+        document.getElementById("roiAdvice").textContent = "Error fetching ROI advice.";
         return null;
       }
     }
@@ -153,66 +186,51 @@
       document.getElementById("loading").classList.remove("hidden");
       document.getElementById("results").classList.add("hidden");
       const data = await fetchBestPractices();
-      
+
       const budget = parseFloat(document.getElementById("budget").value) || 0;
       const farmSize = parseFloat(document.getElementById("farmSize").value) || 0;
       const timeframe = parseFloat(document.getElementById("timeframe").value) || 0;
-      
+
       const projectedGains = calculateROI(budget, farmSize, timeframe);
       const netROI = projectedGains - budget;
-      
+
       document.getElementById("projectedGains").textContent = `$${projectedGains.toFixed(2)}`;
       document.getElementById("netROI").textContent = `$${netROI.toFixed(2)}`;
-      
+
       document.getElementById("loading").classList.add("hidden");
       document.getElementById("results").classList.remove("hidden");
     }
 
-    document.getElementById("downloadPDF").addEventListener("click", () => {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
+    function exportToPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
       
-        // Title
-        doc.setFontSize(18);
-        doc.text("RE-AGRI Calculator Report", 20, 20);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(16);
+      doc.text("RE-AGRI REPORT", 10, 10);
       
-        // Best Practices
-        const bestPractices = document.getElementById("bestPractices").innerText;
-        doc.setFontSize(14);
-        doc.text("Best Practices:", 20, 40);
-        doc.setFontSize(12);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(12);
+      let y = 20;
       
-        // Wrap long text properly
-        let y = 50;
-        const lineHeight = 7;
-        const maxWidth = 170;
-        const splitText = doc.splitTextToSize(bestPractices, maxWidth);
+      doc.text("Best Practices:", 10, y);
+      y += 8;
+      doc.text(document.getElementById("bestPractices").innerText, 10, y, { maxWidth: 180 });
+      y += 20;
       
-        splitText.forEach((line) => {
-          if (y + lineHeight > 280) { // If the text reaches the bottom, add a new page
-            doc.addPage();
-            y = 20; // Reset Y position for new page
-          }
-          doc.text(line, 20, y);
-          y += lineHeight;
-        });
+      doc.text("Estimated ROI:", 10, y);
+      y += 8;
+      doc.text("Projected Gains: " + document.getElementById("projectedGains").innerText, 10, y);
+      y += 8;
+      doc.text("Net ROI: " + document.getElementById("netROI").innerText, 10, y);
+      y += 20;
       
-        // ROI Calculation (Add new page if needed)
-        if (y + 30 > 280) {
-          doc.addPage();
-          y = 20;
-        }
-        
-        doc.setFontSize(14);
-        doc.text("Estimated ROI:", 20, y + 10);
-        doc.setFontSize(12);
-        doc.text(`Projected Gains: ${document.getElementById("projectedGains").textContent}`, 20, y + 20);
-        doc.text(`Net ROI: ${document.getElementById("netROI").textContent}`, 20, y + 30);
+      doc.text("ROI Explanation & Investment Advice:", 10, y);
+      y += 8;
+      doc.text(document.getElementById("roiAdvice").innerText, 10, y, { maxWidth: 180 });
       
-        // Save the PDF
-        doc.save("RE-AGRI-Report.pdf");
-      });
-      
+      doc.save("RE-AGRI_Report.pdf");
+    }
   </script>
 </body>
 </html>
