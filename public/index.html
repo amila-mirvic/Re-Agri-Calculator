@@ -150,25 +150,33 @@
   </div>
 
   <script>
-    function calculateResults() {
+    async function calculateResults() {
       document.getElementById('loading').classList.remove('hidden');
-      setTimeout(() => {
+      const data = {
+        cropCategory: document.getElementById('cropCategory').value,
+        cropType: document.getElementById('cropType').value,
+        soilType: document.getElementById('soilType').value,
+        rainfall: document.getElementById('rainfall').value,
+        climate: document.getElementById('climate').value,
+        budget: document.getElementById('budget').value
+      };
+      try {
+        const response = await fetch("http://localhost:3000/api/generate-recommendations", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data)
+        });
+        const result = await response.json();
+        document.getElementById('bestPractices').innerText = result.bestPractices || "No data available";
+        document.getElementById('roiAdvice').innerText = result.roiAdvice || "No data available";
         document.getElementById('loading').classList.add('hidden');
         document.getElementById('results-modal').style.display = 'flex';
-      }, 1500);
+      } catch (error) {
+        alert("Error fetching recommendations");
+      }
     }
     function closeModal() {
       document.getElementById('results-modal').style.display = 'none';
-    }
-    function downloadPDF() {
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF();
-      doc.text("RE-AGRI Calculator Report", 10, 10);
-      doc.text(`Projected Gains: ${document.getElementById('projectedGains').textContent}`, 10, 20);
-      doc.text(`Net ROI: ${document.getElementById('netROI').textContent}`, 10, 30);
-      doc.text(`Best Practices: ${document.getElementById('bestPractices').textContent}`, 10, 40);
-      doc.text(`Investment Advice: ${document.getElementById('roiAdvice').textContent}`, 10, 50);
-      doc.save("RE-AGRI_Report.pdf");
     }
   </script>
 </body>
