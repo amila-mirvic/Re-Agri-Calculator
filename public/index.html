@@ -69,7 +69,7 @@
     .modal {
       display: none;
       position: fixed;
-      z-index: 1;
+      z-index: 10;
       left: 0;
       top: 0;
       width: 100%;
@@ -84,9 +84,9 @@
       border-radius: 5px;
       width: 80%;
       max-width: 600px;
-      text-align: center;
-      max-height: 80vh;
+      text-align: left;
       overflow-y: auto;
+      max-height: 80vh;
     }
     .close {
       float: right;
@@ -143,26 +143,28 @@
       </div>
     </form>
   </div>
+
+  <!-- Modal for results -->
   <div id="results-modal" class="modal">
     <div class="modal-content">
       <span class="close" onclick="document.getElementById('results-modal').style.display='none'">&times;</span>
       <h2>Calculation Results</h2>
-      <p><strong>Best Practices:</strong> <span id="bestPractices">-</span></p>
-      <p><strong>Projected Gains:</strong> <span id="projectedGains">-</span></p>
-      <p><strong>Net ROI:</strong> <span id="netROI">-</span></p>
-      <p><strong>Investment Advice:</strong> <span id="roiAdvice">-</span></p>
+      <h3>Best Practices</h3>
+      <p id="bestPractices"></p>
+      <h3>Estimated ROI</h3>
+      <p><strong>Projected Gains:</strong> <span id="projectedGains"></span></p>
+      <p><strong>Net ROI:</strong> <span id="netROI"></span></p>
+      <h3>Investment Advice</h3>
+      <p id="roiAdvice"></p>
       <button onclick="downloadPDF()">Download Report</button>
     </div>
   </div>
-</body>
+
   <script>
     async function calculateResults() {
-      console.log("Calculate button clicked!");
-
       const loadingElement = document.getElementById('loading');
       const modalElement = document.getElementById('results-modal');
 
-      // Show loading
       loadingElement.classList.remove('hidden');
       modalElement.style.display = 'none';
 
@@ -185,29 +187,15 @@
 
         const result = await response.json();
 
-        document.getElementById('bestPractices').innerText = result.bestPractices || "-";
-        document.getElementById('projectedGains').innerText = result.projectedGains || "-";
-        document.getElementById('netROI').innerText = result.netROI || "-";
-        document.getElementById('roiAdvice').innerText = result.roiAdvice || "-";
+        document.getElementById('bestPractices').innerHTML = result.bestPractices.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>").replace(/\n/g, "<br><br>");
+        document.getElementById('roiAdvice').innerHTML = result.roiAdvice.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>").replace(/\n/g, "<br><br>");
 
         loadingElement.classList.add('hidden');
         modalElement.style.display = 'flex';
-
       } catch (error) {
         console.error("Error fetching recommendations:", error);
         alert("Failed to fetch recommendations.");
       }
-    }
-
-    function downloadPDF() {
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF();
-      doc.text("Calculation Results", 10, 10);
-      doc.text("Best Practices: " + document.getElementById('bestPractices').innerText, 10, 20);
-      doc.text("Projected Gains: " + document.getElementById('projectedGains').innerText, 10, 30);
-      doc.text("Net ROI: " + document.getElementById('netROI').innerText, 10, 40);
-      doc.text("Investment Advice: " + document.getElementById('roiAdvice').innerText, 10, 50);
-      doc.save("RE-AGRI_Report.pdf");
     }
   </script>
 </body>
