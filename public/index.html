@@ -1,218 +1,208 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>RE-AGRI Calculator</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Quattrocento+Sans:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
-  <style>
-    body {
-      font-family: Quattrocento Sans, sans-serif;
-      margin: 20px;
-      background-color: #f4f4f9;
-      color: #333;
-    }
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 20px;
-      border: 1px solid #ccc;
-      border-radius: 10px;
-      background: #fff;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
-    h1 {
-      text-align: center;
-      color: #4CAF50;
-    }
-    label {
-      display: block;
-      margin-bottom: 8px;
-      font-weight: bold;
-    }
-    input, select, button {
-      width: 100%;
-      padding: 10px;
-      margin-bottom: 20px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-    }
-    button {
-      background: #4CAF50;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-    button:hover {
-      background: #45a049;
-    }
-    .results {
-      margin-top: 20px;
-      padding: 15px;
-      background: #e8f5e9;
-      border: 1px solid #c8e6c9;
-      border-radius: 5px;
-    }
-    .hidden { display: none; }
-    .loading {
-      text-align: center;
-      font-size: 16px;
-      font-weight: bold;
-      color: #4CAF50;
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <h1>RE-AGRI Calculator</h1>
-    <form id="calculator-form">
-      <label>Farm Size (ha): <input type="number" id="farmSize" required></label>
-      <label>Soil Type:
-        <select id="soilType">
-          <option value="sandy">Sandy</option>
-          <option value="clay">Clay</option>
-          <option value="loamy">Loamy</option>
-          <option value="silt">Silt</option>
-        </select>
-      </label>
-      <label>Rainfall (mm): <input type="number" id="rainfall" required></label>
-      <label>Climate:
-        <select id="climate">
-          <option value="tropical">Tropical</option>
-          <option value="arid">Arid</option>
-          <option value="temperate">Temperate</option>
-          <option value="cold">Cold</option>
-        </select>
-      </label>
-      <label>Crop Category:
-        <select id="cropCategory" required>
-          <option value="fruits">Fruits</option>
-          <option value="vegetables">Vegetables</option>
-          <option value="cereals">Cereals</option>
-          <option value="livestock">Livestock</option>
-          <option value="other">Other</option>
-        </select>
-      </label>
-      <label>Specific Crop Type: <input type="text" id="cropType" required></label>
-      <label>Budget (USD): <input type="number" id="budget" required></label>
-      <label>Timeframe (years): <input type="number" id="timeframe" required></label>
-      <button type="button" onclick="calculateResults()">Calculate</button>
-    </form>
-    <div id="loading" class="loading hidden">Calculating... Please wait. It may take minute. </div>
-    <div id="results" class="hidden">
-      <h2>Results & Recommendations</h2>
-      <h3>Best Practices</h3>
-      <p id="bestPractices"></p>
-      <h3>Estimated ROI</h3>
-      <p><strong>Projected Gains:</strong> <span id="projectedGains"></span></p>
-      <p><strong>Net ROI:</strong> <span id="netROI"></span></p>
-      <button id="downloadPDF">Download Report</button>
-    </div>
-  </div>
+
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>RE-AGRI Calculator</title>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+      <link rel="preconnect" href="https://fonts.googleapis.com">
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+      <link href="https://fonts.googleapis.com/css2?family=Quattrocento+Sans:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+      <style>
+        * {
+          box-sizing: border-box;
+          margin: 0;
+          padding: 0;
+        }
+        body {
+          width: 100vw;
+          height: 100vh;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          background: url('https://i0.wp.com/www.indiafarm.org/wp-content/uploads/Organic-farming-vs-organic-agriculture.jpg') no-repeat center center/cover;
+          font-family: Quattrocento Sans, sans-serif;
+          text-align: center;
+        }
+        .container {
+          width: 1000px;
+          height: 600px;
+          padding: 20px;
+          display: flex;
+          flex-direction: column;
+          background: rgba(255, 255, 255, 0.1);
+          border-radius: 15px;
+          backdrop-filter: blur(10px);
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+          justify-content: center;
+        }
+        h1 {
+          color: white;
+          margin-bottom: 20px;
+        }
+        .row {
+          display: flex;
+          gap: 50px;
+          margin-bottom: 20px;
+        }
+        input, select, button {
+          width: 100%;
+          padding: 12px;
+          border: none;
+          border-radius: 5px;
+          font-size: 16px;
+        }
+        input, select {
+          background: rgba(255, 255, 255, 0.6);
+          backdrop-filter: blur(5px);
+        }
+        button {
+          background: #4CAF50;
+          color: white;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          font-size: 18px;
+        }
+        button:hover {
+          background: #45a049;
+          transform: scale(1.05);
+          box-shadow: 0 0 10px rgba(255, 255, 255, 0.6);
+        }
+        .modal {
+          display: none;
+          position: fixed;
+          z-index: 1;
+          left: 0;
+          top: 0;
+          width: 100%;
+          height: 100%;
+          background-color: rgba(0, 0, 0, 0.5);
+          justify-content: center;
+          align-items: center;
+        }
+        .modal-content {
+          background: white;
+          padding: 20px;
+          border-radius: 5px;
+          width: 80%;
+          max-width: 600px;
+          text-align: center;
+        }
+        .close {
+          float: right;
+          font-size: 24px;
+          cursor: pointer;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <h1>RE-AGRI Calculator</h1>
+        <form id="calculator-form" onsubmit="event.preventDefault(); calculateResults();">
+          <div class="row">
+            <input type="number" id="farmSize" placeholder="Farm Size (ha)" required>
+            <select id="soilType">
+              <option value="">Select Soil Type</option>
+              <option value="sandy">Sandy</option>
+              <option value="clay">Clay</option>
+              <option value="loamy">Loamy</option>
+              <option value="silt">Silt</option>
+            </select>
+          </div>
+          <div class="row">
+            <input type="number" id="rainfall" placeholder="Rainfall (mm)" required>
+            <select id="climate">
+              <option value="">Select Climate</option>
+              <option value="tropical">Tropical</option>
+              <option value="arid">Arid</option>
+              <option value="temperate">Temperate</option>
+              <option value="cold">Cold</option>
+            </select>
+          </div>
+          <div class="row">
+            <select id="cropCategory" required>
+              <option value="">Select Crop Category</option>
+              <option value="fruits">Fruits</option>
+              <option value="vegetables">Vegetables</option>
+              <option value="cereals">Cereals</option>
+              <option value="livestock">Livestock</option>
+              <option value="other">Other</option>
+            </select>
+            <input type="text" id="cropType" placeholder="Specific Crop Type" required>
+          </div>
+          <div class="row">
+            <input type="number" id="budget" placeholder="Budget (USD)" required>
+            <input type="number" id="timeframe" placeholder="Timeframe (years)" required>
+          </div>
+          <div class="row">
+            <button type="submit">Calculate</button>
+          </div>
+        </form>
+      </div>
 
   <script>
-    async function fetchBestPractices() {
-      const cropCategory = document.getElementById("cropCategory").value;
-      const cropType = document.getElementById("cropType").value;
-      const soilType = document.getElementById("soilType").value;
-      const rainfall = document.getElementById("rainfall").value;
-      const climate = document.getElementById("climate").value;
-
+    async function calculateResults() {
+      document.getElementById('loading').classList.remove('hidden');
+    
+      const data = {
+        cropCategory: document.getElementById('cropCategory').value,
+        cropType: document.getElementById('cropType').value,
+        soilType: document.getElementById('soilType').value,
+        rainfall: document.getElementById('rainfall').value,
+        climate: document.getElementById('climate').value,
+        budget: document.getElementById('budget').value,
+        timeframe: document.getElementById('timeframe').value
+      };
+    
       try {
         const response = await fetch("/api/generate-recommendations", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ cropCategory, cropType, soilType, rainfall, climate }),
+          body: JSON.stringify(data)
         });
-      
-
-        const data = await response.json();
-        if (data.bestPractices) {
-          document.getElementById("bestPractices").innerHTML = data.bestPractices.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>").replace(/\n/g, "<br><br>");
+    
+        if (!response.ok) {
+          throw new Error("Failed to fetch recommendations.");
         }
-        return data;
+    
+        const result = await response.json();
+    
+        document.getElementById('bestPractices').innerText = result.bestPractices || "No data available";
+        document.getElementById('projectedGains').innerText = result.projectedGains || "N/A";
+        document.getElementById('netROI').innerText = result.netROI || "N/A";
+        document.getElementById('roiAdvice').innerText = result.roiAdvice || "No data available";
+    
+        document.getElementById('loading').classList.add('hidden');
+        document.getElementById('results-modal').style.display = 'flex';
       } catch (error) {
-        console.error("Error fetching recommendations:", error);
-        document.getElementById("bestPractices").textContent = "Error fetching best practices.";
-        return null;
+        document.getElementById('loading').classList.add('hidden');
+        alert("Error fetching recommendations. Please try again.");
       }
     }
-
-    function calculateROI(budget, farmSize, timeframe) {
-      const baseROI = budget * 0.2;
-      const sizeFactor = farmSize * 100;
-      const timeFactor = timeframe * 500;
-      return baseROI + sizeFactor + timeFactor;
+    
+    function downloadPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+    
+      doc.setFont("helvetica", "bold");
+      doc.text("RE-AGRI Calculator Report", 20, 20);
+      
+      doc.setFont("helvetica", "normal");
+      doc.text("Best Practices:", 20, 40);
+      doc.text(document.getElementById('bestPractices').innerText, 20, 50, { maxWidth: 170 });
+    
+      doc.text("Estimated ROI:", 20, 70);
+      doc.text("Projected Gains: " + document.getElementById('projectedGains').innerText, 20, 80);
+      doc.text("Net ROI: " + document.getElementById('netROI').innerText, 20, 90);
+    
+      doc.text("Investment Advice:", 20, 110);
+      doc.text(document.getElementById('roiAdvice').innerText, 20, 120, { maxWidth: 170 });
+    
+      doc.save("RE-AGRI_Report.pdf");
     }
-
-    async function calculateResults() {
-      document.getElementById("loading").classList.remove("hidden");
-      document.getElementById("results").classList.add("hidden");
-      const data = await fetchBestPractices();
-      
-      const budget = parseFloat(document.getElementById("budget").value) || 0;
-      const farmSize = parseFloat(document.getElementById("farmSize").value) || 0;
-      const timeframe = parseFloat(document.getElementById("timeframe").value) || 0;
-      
-      const projectedGains = calculateROI(budget, farmSize, timeframe);
-      const netROI = projectedGains - budget;
-      
-      document.getElementById("projectedGains").textContent = `$${projectedGains.toFixed(2)}`;
-      document.getElementById("netROI").textContent = `$${netROI.toFixed(2)}`;
-      
-      document.getElementById("loading").classList.add("hidden");
-      document.getElementById("results").classList.remove("hidden");
-    }
-
-    document.getElementById("downloadPDF").addEventListener("click", () => {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-      
-        // Title
-        doc.setFontSize(18);
-        doc.text("RE-AGRI Calculator Report", 20, 20);
-      
-        // Best Practices
-        const bestPractices = document.getElementById("bestPractices").innerText;
-        doc.setFontSize(14);
-        doc.text("Best Practices:", 20, 40);
-        doc.setFontSize(12);
-      
-        // Wrap long text properly
-        let y = 50;
-        const lineHeight = 7;
-        const maxWidth = 170;
-        const splitText = doc.splitTextToSize(bestPractices, maxWidth);
-      
-        splitText.forEach((line) => {
-          if (y + lineHeight > 280) { // If the text reaches the bottom, add a new page
-            doc.addPage();
-            y = 20; // Reset Y position for new page
-          }
-          doc.text(line, 20, y);
-          y += lineHeight;
-        });
-      
-        // ROI Calculation (Add new page if needed)
-        if (y + 30 > 280) {
-          doc.addPage();
-          y = 20;
-        }
-        
-        doc.setFontSize(14);
-        doc.text("Estimated ROI:", 20, y + 10);
-        doc.setFontSize(12);
-        doc.text(`Projected Gains: ${document.getElementById("projectedGains").textContent}`, 20, y + 20);
-        doc.text(`Net ROI: ${document.getElementById("netROI").textContent}`, 20, y + 30);
-      
-        // Save the PDF
-        doc.save("RE-AGRI-Report.pdf");
-      });
-      
+    
   </script>
 </body>
 </html>
