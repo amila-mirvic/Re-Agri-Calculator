@@ -196,6 +196,8 @@
     function downloadPDF() {
       const doc = new jsPDF();
       doc.text("RE-AGRI Calculator Report", 20, 20);
+      doc.text(document.getElementById('bestPractices').innerText, 20, 40);
+      doc.text(document.getElementById('roiAdvice').innerText, 20, 80);
       doc.save("RE-AGRI-Report.pdf");
     }
   </script>
