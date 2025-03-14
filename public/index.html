@@ -162,27 +162,22 @@
 
   <script>
     async function calculateResults() {
-      const loadingElement = document.getElementById('loading');
+      document.getElementById('loading').classList.remove('hidden');
       const modalElement = document.getElementById('results-modal');
-
-      loadingElement.classList.remove('hidden');
-      modalElement.style.display = 'none';
-
-      const data = {
-        cropCategory: document.getElementById('cropCategory').value,
-        cropType: document.getElementById('cropType').value,
-        soilType: document.getElementById('soilType').value,
-        rainfall: document.getElementById('rainfall').value,
-        climate: document.getElementById('climate').value,
-        budget: document.getElementById('budget').value,
-        timeframe: document.getElementById('timeframe').value
-      };
 
       try {
         const response = await fetch("/api/generate-recommendations", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data)
+          body: JSON.stringify({
+            cropCategory: document.getElementById('cropCategory').value,
+            cropType: document.getElementById('cropType').value,
+            soilType: document.getElementById('soilType').value,
+            rainfall: document.getElementById('rainfall').value,
+            climate: document.getElementById('climate').value,
+            budget: document.getElementById('budget').value,
+            timeframe: document.getElementById('timeframe').value
+          })
         });
 
         const result = await response.json();
@@ -190,12 +185,18 @@
         document.getElementById('bestPractices').innerHTML = result.bestPractices.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>").replace(/\n/g, "<br><br>");
         document.getElementById('roiAdvice').innerHTML = result.roiAdvice.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>").replace(/\n/g, "<br><br>");
 
-        loadingElement.classList.add('hidden');
+        document.getElementById('loading').classList.add('hidden');
         modalElement.style.display = 'flex';
       } catch (error) {
         console.error("Error fetching recommendations:", error);
         alert("Failed to fetch recommendations.");
       }
+    }
+
+    function downloadPDF() {
+      const doc = new jsPDF();
+      doc.text("RE-AGRI Calculator Report", 20, 20);
+      doc.save("RE-AGRI-Report.pdf");
     }
   </script>
 </body>
