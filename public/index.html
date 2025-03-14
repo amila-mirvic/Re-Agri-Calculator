@@ -84,7 +84,9 @@
       border-radius: 5px;
       width: 80%;
       max-width: 600px;
-      text-align: center;
+      text-align: left;
+      max-height: 80vh;
+      overflow-y: auto;
     }
     .close {
       float: right;
@@ -142,17 +144,19 @@
     </form>
   </div>
 
-  <!-- 🔹 ADDED MODAL FOR RESULTS 🔹 -->
   <div id="results-modal" class="modal">
     <div class="modal-content">
       <span class="close" onclick="document.getElementById('results-modal').style.display='none'">&times;</span>
       <h2>Calculation Results</h2>
-      <p><strong>Best Practices:</strong> <span id="bestPractices">-</span></p>
-      <p><strong>Projected Gains:</strong> <span id="projectedGains">-</span></p>
-      <p><strong>Net ROI:</strong> <span id="netROI">-</span></p>
-      <p><strong>Investment Advice:</strong> <span id="roiAdvice">-</span></p>
+      <h3>Best Practices</h3>
+      <p id="bestPractices">-</p>
+      <h3>Projected Gains</h3>
+      <p id="projectedGains">-</p>
+      <h3>Net ROI</h3>
+      <p id="netROI">-</p>
+      <h3>Investment Advice</h3>
+      <p id="roiAdvice">-</p>
     </div>
-  </div>
 
   <script>
     async function calculateResults() {
