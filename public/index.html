@@ -208,8 +208,9 @@
     }
     
     function downloadPDF() {
-      const { jsPDF } = window.jspdf; // ✅ Ensure jsPDF is properly referenced
+      const { jsPDF } = window.jspdf;
       const doc = new jsPDF();
+    
       doc.setFontSize(18);
       doc.text("RE-AGRI Calculator Report", 20, 20);
     
@@ -217,14 +218,36 @@
       const roiAdvice = document.getElementById('roiAdvice').textContent;
     
       doc.setFontSize(12);
-      doc.text("Best Practices:", 20, 40);
-      doc.text(bestPractices, 20, 50, { maxWidth: 170 });
     
-      doc.text("Investment Advice:", 20, 100);
-      doc.text(roiAdvice, 20, 110, { maxWidth: 170 });
+      // Function to handle text wrapping and page breaks
+      function addTextWithPageBreaks(doc, text, x, y, maxWidth, lineHeight) {
+        const splitText = doc.splitTextToSize(text, maxWidth);
+        let cursorY = y;
+    
+        splitText.forEach((line, index) => {
+          if (cursorY > 270) { // Check if we need a new page
+            doc.addPage();
+            cursorY = 20; // Reset cursor position for new page
+          }
+          doc.text(line, x, cursorY);
+          cursorY += lineHeight;
+        });
+        return cursorY;
+      }
+    
+      let cursorY = 40; // Initial position
+      doc.text("Best Practices:", 20, cursorY);
+      cursorY = addTextWithPageBreaks(doc, bestPractices, 20, cursorY + 10, 170, 7);
+    
+      doc.addPage(); // Add a new page for the next section
+    
+      cursorY = 20;
+      doc.text("Investment Advice:", 20, cursorY);
+      cursorY = addTextWithPageBreaks(doc, roiAdvice, 20, cursorY + 10, 170, 7);
     
       doc.save("RE-AGRI-Report.pdf");
     }
+    
     
     
   </script>
