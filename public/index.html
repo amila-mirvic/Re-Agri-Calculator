@@ -77,6 +77,7 @@
       background-color: rgba(0, 0, 0, 0.5);
       justify-content: center;
       align-items: center;
+      overflow-y: auto;
     }
     .modal-content {
       background: white;
@@ -84,9 +85,7 @@
       border-radius: 5px;
       width: 80%;
       max-width: 600px;
-      text-align: left;
-      max-height: 80vh;
-      overflow-y: auto;
+      text-align: center;
     }
     .close {
       float: right;
@@ -95,14 +94,6 @@
     }
     .hidden {
       display: none;
-    }
-
-    #loading {
-      font-family: Quattrocento Sans, sans-serif;
-      font-size: 20px;
-      color: #45a049;
-      margin-top: 15px;
-      margin-bottom: 15px;
     }
   </style>
 </head>
@@ -156,10 +147,10 @@
     <div class="modal-content">
       <span class="close" onclick="document.getElementById('results-modal').style.display='none'">&times;</span>
       <h2>Calculation Results</h2>
-      <p><span class="bold">Best Practices:</span> <span id="bestPractices"></span></p>
-      <p><span class="bold">Projected Gains:</span> <span id="projectedGains"></span></p>
-      <p><span class="bold">Net ROI:</span> <span id="netROI"></span></p>
-      <p><span class="bold">Investment Advice:</span> <span id="roiAdvice"></span></p>
+      <p><strong>Best Practices:</strong> <span id="bestPractices">-</span></p>
+      <p><strong>Projected Gains:</strong> <span id="projectedGains">-</span></p>
+      <p><strong>Net ROI:</strong> <span id="netROI">-</span></p>
+      <p><strong>Investment Advice:</strong> <span id="roiAdvice">-</span></p>
       <button onclick="downloadPDF()">Download Report</button>
     </div>
   </div>
