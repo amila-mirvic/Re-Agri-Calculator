@@ -198,6 +198,7 @@
     }
     
     function downloadPDF() {
+      const { jsPDF } = window.jspdf; // ✅ Ensure jsPDF is properly referenced
       const doc = new jsPDF();
       doc.setFontSize(18);
       doc.text("RE-AGRI Calculator Report", 20, 20);
@@ -214,6 +215,7 @@
     
       doc.save("RE-AGRI-Report.pdf");
     }
+    
     
   </script>
 </body>
