@@ -191,6 +191,13 @@
         alert("Failed to fetch recommendations.");
       }
     }
+
+    function downloadPDF() {
+      const doc = new jsPDF();
+      doc.setFontSize(18);
+      doc.text("RE-AGRI Calculator Report", 20, 20);
+      doc.save("RE-AGRI-Report.pdf");
+    }
   </script>
 </body>
 </html>
