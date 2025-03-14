@@ -19,7 +19,7 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      background: url('https://i0.wp.com/www.indiafarm.org/wp-content/uploads/Organic-farming-vs-organic-agriculture.jpg') no-repeat center center/cover;
+      background: url('/public/bg.jpg') no-repeat center center/cover;
       font-family: Quattrocento Sans, sans-serif;
       text-align: center;
     }
@@ -95,6 +95,15 @@
     }
     .hidden {
       display: none;
+    }
+
+    #loading {
+      font-family: Quattrocento Sans, sans-serif;
+      font-size: 24px;
+      color: #fff;
+      margin-bottom: 35px;
+      margin-top: 15px;
+
     }
   </style>
 </head>
@@ -186,9 +195,6 @@
     
         document.getElementById('loading').classList.add('hidden');
         modalElement.style.display = 'flex';
-    
-        // ✅ Auto-download PDF report after showing results
-        setTimeout(downloadPDF, 2000); // Delay to ensure content is visible
     
       } catch (error) {
         console.error("Error fetching recommendations:", error);
