@@ -144,7 +144,14 @@
 
   <script>
     async function calculateResults() {
-      document.getElementById('loading').classList.remove('hidden');
+      console.log("Calculate button clicked!"); // Debugging
+    
+      const loadingElement = document.getElementById('loading');
+      const modalElement = document.getElementById('results-modal');
+    
+      // Show loading indicator
+      loadingElement.classList.remove('hidden');
+      modalElement.style.display = 'none';
     
       const data = {
         cropCategory: document.getElementById('cropCategory').value,
@@ -156,6 +163,8 @@
         timeframe: document.getElementById('timeframe').value
       };
     
+      console.log("Sending API request with data:", data); // Debugging
+    
       try {
         const response = await fetch("/api/generate-recommendations", {
           method: "POST",
@@ -164,43 +173,27 @@
         });
     
         if (!response.ok) {
-          throw new Error("Failed to fetch recommendations.");
+          throw new Error(`API Error: ${response.status}`);
         }
     
         const result = await response.json();
+        console.log("API response:", result); // Debugging
     
+        // Update UI with results
         document.getElementById('bestPractices').innerText = result.bestPractices || "No data available";
         document.getElementById('projectedGains').innerText = result.projectedGains || "N/A";
         document.getElementById('netROI').innerText = result.netROI || "N/A";
         document.getElementById('roiAdvice').innerText = result.roiAdvice || "No data available";
     
-        document.getElementById('loading').classList.add('hidden');
-        document.getElementById('results-modal').style.display = 'flex';
+        // Hide loading, show modal
+        loadingElement.classList.add('hidden');
+        modalElement.style.display = 'flex';
+    
       } catch (error) {
-        document.getElementById('loading').classList.add('hidden');
+        console.error("Error fetching recommendations:", error); // Debugging
+        loadingElement.classList.add('hidden');
         alert("Error fetching recommendations. Please try again.");
       }
-    }
-    
-    function downloadPDF() {
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF();
-    
-      doc.setFont("helvetica", "bold");
-      doc.text("RE-AGRI Calculator Report", 20, 20);
-      
-      doc.setFont("helvetica", "normal");
-      doc.text("Best Practices:", 20, 40);
-      doc.text(document.getElementById('bestPractices').innerText, 20, 50, { maxWidth: 170 });
-    
-      doc.text("Estimated ROI:", 20, 70);
-      doc.text("Projected Gains: " + document.getElementById('projectedGains').innerText, 20, 80);
-      doc.text("Net ROI: " + document.getElementById('netROI').innerText, 20, 90);
-    
-      doc.text("Investment Advice:", 20, 110);
-      doc.text(document.getElementById('roiAdvice').innerText, 20, 120, { maxWidth: 170 });
-    
-      doc.save("RE-AGRI_Report.pdf");
     }
     
   </script>
