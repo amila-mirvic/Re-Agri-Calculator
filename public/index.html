@@ -163,7 +163,7 @@
     async function calculateResults() {
       document.getElementById('loading').classList.remove('hidden');
       const modalElement = document.getElementById('results-modal');
-
+    
       try {
         const response = await fetch("/api/generate-recommendations", {
           method: "POST",
@@ -178,26 +178,43 @@
             timeframe: document.getElementById('timeframe').value
           })
         });
-
+    
         const result = await response.json();
-
+    
         document.getElementById('bestPractices').innerHTML = result.bestPractices.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>").replace(/\n/g, "<br><br>");
         document.getElementById('roiAdvice').innerHTML = result.roiAdvice.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>").replace(/\n/g, "<br><br>");
-
+    
         document.getElementById('loading').classList.add('hidden');
         modalElement.style.display = 'flex';
+    
+        // ✅ Auto-download PDF report after showing results
+        setTimeout(downloadPDF, 2000); // Delay to ensure content is visible
+    
       } catch (error) {
         console.error("Error fetching recommendations:", error);
         alert("Failed to fetch recommendations.");
+        document.getElementById('loading').classList.add('hidden');
       }
     }
-
+    
     function downloadPDF() {
       const doc = new jsPDF();
       doc.setFontSize(18);
       doc.text("RE-AGRI Calculator Report", 20, 20);
+    
+      const bestPractices = document.getElementById('bestPractices').textContent;
+      const roiAdvice = document.getElementById('roiAdvice').textContent;
+    
+      doc.setFontSize(12);
+      doc.text("Best Practices:", 20, 40);
+      doc.text(bestPractices, 20, 50, { maxWidth: 170 });
+    
+      doc.text("Investment Advice:", 20, 100);
+      doc.text(roiAdvice, 20, 110, { maxWidth: 170 });
+    
       doc.save("RE-AGRI-Report.pdf");
     }
+    
   </script>
 </body>
 </html>
