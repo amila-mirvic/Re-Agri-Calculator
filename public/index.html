@@ -166,7 +166,7 @@
       console.log("Sending API request with data:", data); // Debugging
     
       try {
-        const response = await fetch("/api/generate-recommendations", {
+        const response = await fetch("/api/generate-recommendations.js", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(data)
