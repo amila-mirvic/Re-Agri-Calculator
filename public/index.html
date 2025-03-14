@@ -96,6 +96,14 @@
     .hidden {
       display: none;
     }
+
+    #loading {
+      font-family: Quattrocento Sans, sans-serif;
+      font-size: 20px;
+      color: #45a049;
+      margin-top: 15px;
+      margin-bottom: 15px;
+    }
   </style>
 </head>
 <body>
@@ -148,15 +156,13 @@
     <div class="modal-content">
       <span class="close" onclick="document.getElementById('results-modal').style.display='none'">&times;</span>
       <h2>Calculation Results</h2>
-      <h3>Best Practices</h3>
-      <p id="bestPractices">-</p>
-      <h3>Projected Gains</h3>
-      <p id="projectedGains">-</p>
-      <h3>Net ROI</h3>
-      <p id="netROI">-</p>
-      <h3>Investment Advice</h3>
-      <p id="roiAdvice">-</p>
+      <p><span class="bold">Best Practices:</span> <span id="bestPractices"></span></p>
+      <p><span class="bold">Projected Gains:</span> <span id="projectedGains"></span></p>
+      <p><span class="bold">Net ROI:</span> <span id="netROI"></span></p>
+      <p><span class="bold">Investment Advice:</span> <span id="roiAdvice"></span></p>
+      <button onclick="downloadPDF()">Download Report</button>
     </div>
+  </div>
 
   <script>
     async function calculateResults() {
@@ -200,6 +206,17 @@
         console.error("Error fetching recommendations:", error);
         alert("Failed to fetch recommendations.");
       }
+    }
+
+    function downloadPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      doc.text("Calculation Results", 10, 10);
+      doc.text("Best Practices: " + document.getElementById('bestPractices').innerText, 10, 20);
+      doc.text("Projected Gains: " + document.getElementById('projectedGains').innerText, 10, 30);
+      doc.text("Net ROI: " + document.getElementById('netROI').innerText, 10, 40);
+      doc.text("Investment Advice: " + document.getElementById('roiAdvice').innerText, 10, 50);
+      doc.save("RE-AGRI_Report.pdf");
     }
   </script>
 </body>
